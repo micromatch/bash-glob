@@ -1,0 +1,43 @@
+'use strict';
+
+var cwd = process.cwd();
+var isWindows = process.platform === 'win32';
+var assert = require('assert');
+var path = require('path');
+var glob = require('..');
+
+describe('follow symlinks:', function() {
+  before(function() {
+    process.chdir(path.join(__dirname, 'fixtures'));
+  });
+
+  after(function() {
+    process.chdir(cwd);
+  });
+
+
+  it('should follow symlinks', function(cb) {
+    if (isWindows) return this.skip();
+
+    var pattern = 'a/symlink/**';
+    var followSync = glob.sync(pattern, { follow: true }).sort();
+    var noFollowSync = glob.sync(pattern).sort();
+
+    glob(pattern, { follow: true }, function(err, files) {
+      if (err) throw err;
+      var follow = files.sort();
+
+      glob(pattern, function(err, files) {
+        if (err) throw err;
+        var noFollow = files.sort();
+
+        assert.deepEqual(noFollow, noFollowSync, 'sync and async noFollow should match');
+        var long = path.resolve('a/symlink/a/b');
+        assert.deepEqual(follow, followSync, 'sync and async follow should match');
+        assert.notEqual(follow.indexOf(long), -1, 'follow should have long entry');
+        assert.notEqual(followSync.indexOf(long), -1, 'followSync should have long entry');
+        cb();
+      });
+    });
+  });
+});

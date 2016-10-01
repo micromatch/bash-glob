@@ -3,12 +3,10 @@
 require('mocha');
 var del = require('delete');
 var path = require('path');
-var assert = require('assert');
 var fixtures = path.join(__dirname, 'fixtures');
 var symlinks = require('./support/symlinks');
 var setup = require('./support/setup');
 var home = require('./support/home');
-var glob = require('..');
 
 var files = [
   'a/.abcdef/x/y/z/a',
@@ -23,7 +21,7 @@ var files = [
 ];
 
 describe('async', function() {
-  describe.only('setup', function() {
+  describe('setup', function() {
     it('should remove fixtures', function(cb) {
       del(fixtures, function(err) {
         if (err) return cb(err);
@@ -41,17 +39,6 @@ describe('async', function() {
 
     it('should setup fixtures in user home', function(cb) {
       home(['foo', 'bar', 'baz', 'asdf', 'quux', 'qwer', 'rewq'], cb);
-    });
-  });
-
-  describe('API', function() {
-    it('should export an function', function() {
-      assert(glob);
-      assert.equal(typeof glob, 'function');
-    });
-
-    it('should export a `.sync` method', function() {
-      assert.equal(typeof glob.sync, 'function');
     });
   });
 });

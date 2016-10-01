@@ -21,16 +21,21 @@
   },
   "keywords": [
     "bash",
-    "generategenerator",
     "glob"
   ],
   "dependencies": {
+    "async-each": "^1.0.1",
+    "component-emitter": "^1.2.1",
     "cross-spawn": "^4.0.2",
     "extend-shallow": "^2.0.1",
-    "is-extglob": "^2.0.0"
+    "fs-exists-sync": "^0.1.0",
+    "is-extglob": "^2.0.0",
+    "is-glob": "^3.0.0"
   },
   "devDependencies": {
-    "async-each": "^1.0.1",
+    "arr-diff": "^3.0.0",
+    "arr-union": "^3.1.0",
+    "array-unique": "^0.3.2",
     "delete": "^0.3.2",
     "gulp-format-md": "^0.1.11",
     "mkdirp": "^0.5.1",

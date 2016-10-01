@@ -5,7 +5,6 @@ var path = require('path');
 var mkdirp = require('mkdirp');
 var each = require('async-each');
 var del = require('delete');
-var symlinks = require('./symlinks');
 
 module.exports = function(files, cwd, cb) {
   del(cwd, function(err) {
@@ -20,5 +19,5 @@ module.exports = function(files, cwd, cb) {
         fs.writeFile(filepath, 'contents', next);
       });
     }, cb);
-  })
+  });
 };

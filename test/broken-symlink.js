@@ -3,86 +3,106 @@
 var isWindows = process.platform === 'win32';
 var fs = require('fs');
 var path = require('path');
-var util = require('util');
-var assert = require('assert');
 var each = require('async-each');
+var assert = require('assert');
 var mkdirp = require('mkdirp');
 var glob = require('..');
 
-var origCwd = process.cwd();
-var fixtures = path.join(__dirname, 'fixtures');
-var link = path.join(fixtures, 'a/broken-link/link');
-var linkDir = path.dirname(link);
+var cwd = process.cwd();
 
+var link = 'fixtures/a/broken-link/link';
 var patterns = [
-  'a/broken-link/*',
-  'a/broken-link/**',
-  'a/broken-link/**/link',
-  'a/broken-link/**/*',
-  'a/broken-link/link',
-  'a/broken-link/{link,asdf}',
-  'a/broken-link/+(link|asdf)',
-  'a/broken-link/!(asdf)'
+  'fixtures/a/broken-link/*',
+  'fixtures/a/broken-link/**',
+  'fixtures/a/broken-link/**/link',
+  'fixtures/a/broken-link/**/*',
+  'fixtures/a/broken-link/link',
+  'fixtures/a/broken-link/{link,asdf}',
+  'fixtures/a/broken-link/+(link|asdf)',
+  'fixtures/a/broken-link/!(asdf)'
 ];
 
 var options = [
   null,
-  {nonull: true},
-  {mark: true},
-  {stat: true},
-  {follow: true}
+  {nonull: true },
+  {mark: true },
+  {stat: true },
+  {follow: true }
 ];
 
-function cleanup() {
-  try {
-    fs.unlinkSync(link);
-  } catch (err) {}
-  try {
-    fs.rmdirSync(linkDir);
-  } catch (err) {}
-}
-
-describe('broken symlinks', function() {
-  beforeEach(function(cb) {
+describe('set up broken symlink', function() {
+  before('set up broken symlink', function(cb) {
+    process.chdir(__dirname);
     cleanup();
-    mkdirp.sync(linkDir);
-    fs.symlinkSync('this-does-not-exist', link);
-    process.chdir(fixtures);
+    mkdirp.sync('fixtures/a/broken-link');
+    fs.symlinkSync('this-does-not-exist', 'fixtures/a/broken-link/link');
     cb();
   });
 
-  afterEach(function(cb) {
+  after('cleanup', function(cb) {
     cleanup();
-    process.chdir(origCwd);
+    process.chdir(cwd);
     cb();
   });
 
-  describe('async support', function() {
-    it('should async globbing', function(done) {
-      each(patterns, function(pattern, cb) {
+  describe('async test', function() {
+    patterns.forEach(function(pattern) {
+      it(pattern, function(cb) {
+        if (isWindows) {
+          this.skip();
+          return;
+        }
+
+        var syncFiles = glob.sync(pattern);
+
         each(options, function(opts, next) {
-          glob(path.resolve(fixtures, pattern), opts, function(err, files) {
+          glob(pattern, opts, function(err, files) {
             if (err) return next(err);
-            var msg = pattern + ' ' + JSON.stringify(opts);
-            assert.notEqual(files.indexOf(link), -1, msg);
+            var msg = pattern + ' options=' + JSON.stringify(opts);
+            if (opts && opts.follow === true) {
+              assert.equal(files.indexOf(link), -1, msg);
+            } else if (pattern !== link || (opts && opts.nonull)) {
+              assert.notEqual(files.indexOf(link), -1, msg);
+            } else {
+              assert(!files.length);
+            }
             next();
           });
         }, cb);
-      }, done);
+      });
     });
   });
 
-  describe('sync support', function() {
+  describe('sync test', function() {
     patterns.forEach(function(pattern) {
-      describe(pattern, function() {
+      it(pattern, function() {
+        if (isWindows) {
+          this.skip();
+          return;
+        }
+
         options.forEach(function(opts) {
-          var optsString = 'options = ' + util.inspect(opts, {depth: null});
-          it(optsString, function() {
-            var files = glob.sync(path.resolve(fixtures, pattern), opts);
-            assert.notEqual(files.indexOf(link), -1, optsString);
-          });
+          var files = glob.sync(pattern, opts);
+          var msg = pattern + ' options=' + JSON.stringify(opts);
+
+          if (opts && opts.follow === true) {
+            assert.equal(files.indexOf(link), -1, msg);
+          } else if (pattern !== link || (opts && opts.nonull)) {
+            assert.notEqual(files.indexOf(link), -1, msg);
+          } else {
+            assert(!files.length);
+          }
         });
       });
     });
   });
 });
+
+function cleanup() {
+  try {
+    fs.unlinkSync(path.resolve(__dirname, 'fixtures/a/broken-link/link'));
+  } catch (e) {}
+  try {
+    fs.rmdirSync(path.resolve(__dirname, 'fixtures/a/broken-link'));
+  } catch (e) {}
+}

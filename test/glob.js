@@ -30,7 +30,7 @@ describe('bash-glob', function() {
 
     it('should throw an error when invalid glob is passed', function(cb) {
       glob(null, function(err, files) {
-        assert.equal(err.message, 'expected glob patterns to be a string or array');
+        assert.equal(err.message, 'expected glob to be a string or array');
         cb();
       });
     });
@@ -43,7 +43,7 @@ describe('bash-glob', function() {
         cb(new Error('expected an error'));
       } catch (err) {
         assert(err);
-        assert.equal(err.message, 'expected glob patterns to be a string or array');
+        assert.equal(err.message, 'expected glob to be a string or array');
         cb();
       }
     });
