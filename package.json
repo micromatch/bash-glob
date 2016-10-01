@@ -1,0 +1,60 @@
+{
+  "name": "bash-glob",
+  "description": "Bash-powered globbing for node.js",
+  "version": "0.1.0",
+  "homepage": "https://github.com/jonschlinkert/bash-glob",
+  "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
+  "repository": "jonschlinkert/bash-glob",
+  "bugs": {
+    "url": "https://github.com/jonschlinkert/bash-glob/issues"
+  },
+  "license": "MIT",
+  "files": [
+    "index.js"
+  ],
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "bash",
+    "generategenerator",
+    "glob"
+  ],
+  "dependencies": {
+    "cross-spawn": "^4.0.2",
+    "extend-shallow": "^2.0.1",
+    "is-extglob": "^2.0.0"
+  },
+  "devDependencies": {
+    "async-each": "^1.0.1",
+    "delete": "^0.3.2",
+    "gulp-format-md": "^0.1.11",
+    "mkdirp": "^0.5.1",
+    "mocha": "^3.1.0"
+  },
+  "verb": {
+    "toc": false,
+    "layout": "default",
+    "tasks": [
+      "readme"
+    ],
+    "plugins": [
+      "gulp-format-md"
+    ],
+    "lint": {
+      "reflinks": true
+    },
+    "related": {
+      "list": []
+    },
+    "reflinks": [
+      "node-glob",
+      "verb",
+      "verb-generate-readme"
+    ]
+  }
+}
