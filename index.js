@@ -20,7 +20,7 @@ var bashPath = process.platform === 'darwin'
  *
  * ```js
  * var glob = require('bash-glob');
- * glob(['*.js', '*.md'], {dot: true}, function(err, files) {
+ * glob('*.js', function(err, files) {
  *   if (err) return console.log(err);
  *   console.log(files);
  * });
@@ -131,6 +131,22 @@ function glob(pattern, options, cb) {
 
   return glob;
 };
+
+/**
+ * Asynchronously glob an array of files that match any of the given `patterns`.
+ *
+ * ```js
+ * var glob = require('bash-glob');
+ * glob.each(['*.js', '*.md'], {dot: true}, function(err, files) {
+ *   if (err) return console.log(err);
+ *   console.log(files);
+ * });
+ * ```
+ * @param {String} `patterns` One or more glob patterns to use for matching.
+ * @param {Object} `options` Options to pass to bash. See available [options](#options).
+ * @param {Function} `cb` Callback function, with `err` and `files` array.
+ * @api public
+ */
 
 glob.each = function(patterns, options, cb) {
   if (typeof patterns === 'string') {
