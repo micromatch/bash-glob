@@ -19,7 +19,7 @@ var glob = require('./');
 //   console.log(files);
 // });
 
-glob('*.md', {dot: true, nonull: true}, function(err, files) {
+glob('*.asfkasjks', {dot: true}, function(err, files) {
   if (err) return console.log(err);
   console.log(files);
 });

@@ -29,6 +29,7 @@
     "cross-spawn": "^4.0.2",
     "extend-shallow": "^2.0.1",
     "fs-exists-sync": "^0.1.0",
+    "fs.realpath": "^1.0.0",
     "is-extglob": "^2.0.0",
     "is-glob": "^3.0.0"
   },
@@ -37,9 +38,11 @@
     "arr-union": "^3.1.0",
     "array-unique": "^0.3.2",
     "delete": "^0.3.2",
+    "glob": "^7.1.0",
     "gulp-format-md": "^0.1.11",
     "mkdirp": "^0.5.1",
-    "mocha": "^3.1.0"
+    "mocha": "^3.1.0",
+    "yargs-parser": "^4.0.2"
   },
   "verb": {
     "toc": false,

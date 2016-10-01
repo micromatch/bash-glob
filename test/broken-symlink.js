@@ -53,8 +53,6 @@ describe('set up broken symlink', function() {
           return;
         }
 
-        var syncFiles = glob.sync(pattern);
-
         each(options, function(opts, next) {
           glob(pattern, opts, function(err, files) {
             if (err) return next(err);

@@ -1,7 +1,6 @@
 'use strict';
 
 var cwd = process.cwd();
-var isWindows = process.platform === 'win32';
 var unique = require('array-unique');
 var assert = require('assert');
 var path = require('path');

@@ -5,6 +5,7 @@ var path = require('path');
 var diff = require('arr-diff');
 var isGlob = require('is-glob');
 var each = require('async-each');
+var realpath = require('fs.realpath');
 var exists = require('fs-exists-sync');
 var spawn = require('cross-spawn');
 var isExtglob = require('is-extglob');
@@ -13,6 +14,45 @@ var Emitter = require('component-emitter');
 var bashPath = process.platform === 'darwin'
   ? '/usr/local/bin/bash'
   : 'bash';
+
+/**
+ * Base bash function
+ */
+
+function bash(pattern, options, cb) {
+  if (!isGlob(pattern)) {
+    return nonGlob(pattern, options, cb);
+  }
+
+  fs.stat(options.cwd, function(err, stats) {
+    if (err) {
+      cb(handleError(err, pattern, options));
+      return;
+    }
+
+    if (!stats.isDirectory()) {
+      cb(new Error('cwd is not a directory: ' + options.cwd));
+      return;
+    }
+
+    var cp = spawn(bashPath, cmd(pattern, options), options);
+    var buf = new Buffer(0);
+
+    cp.stdout.on('data', function(data) {
+      emitMatches(data.toString(), pattern, options);
+      buf = Buffer.concat([buf, data]);
+    });
+
+    cp.stderr.on('data', function(data) {
+      cb(handleError(data.toString(), pattern, options));
+    });
+
+    cp.on('close', function(code) {
+      cb(code, getFiles(buf.toString(), pattern, options));
+    });
+  });
+  return glob;
+}
 
 /**
  * Asynchronously returns an array of files that match the given pattern
@@ -25,7 +65,7 @@ var bashPath = process.platform === 'darwin'
  *   console.log(files);
  * });
  * ```
- * @param {String} `patterns` One or more glob patterns to use for matching.
+ * @param {String|Array} `patterns` One or more glob patterns to use for matching.
  * @param {Object} `options` Options to pass to bash. See available [options](#options).
  * @param {Function} `cb` Callback function, with `err` and `files` array.
  * @api public
@@ -51,86 +91,34 @@ function glob(pattern, options, cb) {
   }
 
   var opts = createOptions(pattern, options);
-  if (!isGlob(pattern)) {
-    var fp = path.resolve(opts.cwd, pattern);
 
-    fs.stat(fp, function(error, stat) {
-      var files = [pattern];
-      if (error) {
-        var err = handleError(error, pattern, opts);
-        if (err instanceof Error) {
-          glob.emit('files', [], opts.cwd);
-          cb(err, []);
-          return;
-        }
-        files = err;
-      }
-      glob.emit('files', files, opts.cwd);
-      cb(null, files);
-    });
-    return;
-  }
-
-  fs.stat(opts.cwd, function(err, stats) {
-    if (err) {
-      if (err.code === 'ENOENT') {
-        var files = opts.nullglob ? [pattern] : [];
-        glob.emit('files', files, opts.cwd);
-        cb(null, files);
-        return;
-      }
+  bash(pattern, opts, function(err, files) {
+    if (err instanceof Error) {
       cb(err);
       return;
     }
 
-    if (!stats.isDirectory()) {
-      cb(new Error('cwd is not a directory: ' + opts.cwd));
-      return;
+    if (!files) {
+      files = err;
     }
 
-    var cp = spawn(bashPath, cmd(pattern, opts), opts);
-    var buf = new Buffer(0);
-    cp.stdout.on('data', function(data) {
-      var match = getFiles(data.toString(), pattern, opts);
-      glob.emit('match', match, opts.cwd);
-      buf = Buffer.concat([buf, data]);
-    });
+    if (Array.isArray(files) && !files.length && opts.nullglob) {
+      files = [pattern];
+    }
 
-    cp.stderr.on('data', function(data) {
-      glob.off('files');
-      var err = handleError(data.toString(), pattern, opts);
-      if (err instanceof Error) {
-        cb(err, []);
-        return;
-      }
-      cb(null, err);
-    });
-
-    cp.on('close', function(code) {
-      if ((code && code === 1) || !buf) {
-        cache[key] = [];
-        cb(null, []);
-
-      } else if (code) {
-        cb(code, []);
-        process.exit(code);
-
-      } else {
-        var files = getFiles(buf.toString(), pattern, opts);
-        if (files instanceof Error) {
-          cb(files, []);
-          return;
-        }
-
-        glob.emit('files', files, opts.cwd);
-        if (!opts.each) glob.end(files);
-        cb(null, files);
-      }
-    });
+    glob.emit('files', files, opts.cwd);
+    if (!opts.each) glob.end(files);
+    cb(null, files);
   });
 
   return glob;
-};
+}
+
+/**
+ * Mixin `Emitter` methods
+ */
+
+Emitter(glob);
 
 /**
  * Asynchronously glob an array of files that match any of the given `patterns`.
@@ -257,6 +245,10 @@ glob.sync = function(pattern, options) {
   return files;
 };
 
+/**
+ * Emit `end` and remove listeners
+ */
+
 glob.end = function(files) {
   glob.emit('end', files);
   glob.off('match');
@@ -330,6 +322,10 @@ function createOptions(pattern, options) {
   return opts;
 }
 
+/**
+ * Handle errors to ensure the correct value is returned based on options
+ */
+
 function handleError(err, pattern, options) {
   if (typeof err === 'string' && /no match:/.test(err)) {
     err = new Error('no matches:' + pattern);
@@ -347,24 +343,18 @@ function handleError(err, pattern, options) {
   return err;
 }
 
+/**
+ * Handle files to ensure the correct value is returned based on options
+ */
+
 function getFiles(res, pattern, options) {
   var files = res.split(/\r?\n/).filter(Boolean);
   if (files.length === 1 && files[0] === pattern) {
     files = [];
   }
-
-  if (options.follow === true) {
-    var len = files.length;
-    var idx = -1;
-    while (++idx < len) {
-      try {
-        files[idx] = fs.realpathSync(path.join(options.cwd, files[idx]));
-      } catch (err) {
-        files.splice(idx, 1);
-      }
-    }
+  if (options.realpath === true || options.follow === true) {
+    files = toAbsolute(files, options);
   }
-
   if (files.length === 0) {
     if (options.nullglob === true) {
       return [pattern];
@@ -376,8 +366,99 @@ function getFiles(res, pattern, options) {
   return files;
 }
 
-Emitter(glob);
-glob.cache = {};
+/**
+ * Make symlinks absolute when `options.follow` is defined.
+ */
+
+function toAbsolute(files, options) {
+  var len = files.length;
+  var idx = -1;
+  var arr = [];
+
+  while (++idx < len) {
+    var file = files[idx];
+    if (file && options.cwd) {
+      file = path.resolve(options.cwd, file);
+    }
+    if (file && options.realpath === true) {
+      file = follow(file);
+    }
+    if (file) {
+      arr.push(file);
+    }
+  }
+  return arr;
+}
+
+/**
+ * Follow symlinks
+ */
+
+function follow(file) {
+  if (!isSymlink(file) && !exists(file)) {
+    return null;
+  }
+  return file;
+}
+
+function isDirectory(file) {
+  var stat = tryStat(file.path);
+  if (stat) {
+    return stat.isDirectory();
+  }
+}
+
+function isSymlink(file) {
+  var stat = tryStat(file.path);
+  if (stat) {
+    return stat.isSymbolicLink();
+  }
+}
+
+function tryStat(filepath) {
+  try {
+    return fs.lstatSync(filepath);
+  } catch (err) {}
+  return null;
+}
+
+function slashify(filepath) {
+  if (filepath.slice(-1) !== '') {
+    filepath += '/';
+  }
+  return filepath;
+}
+
+/**
+ * Handle callback
+ */
+
+function callback(files, pattern, options, cb) {
+  return function(err) {
+    if (err) {
+      cb(handleError(err, pattern, options), []);
+      return;
+    }
+    cb(null, files || [pattern]);
+  }
+}
+
+/**
+ * Handle non-globs
+ */
+
+function nonGlob(pattern, options, cb) {
+  fs.stat(pattern, callback(null, pattern, options, cb));
+  return;
+}
+
+/**
+ * Emit matches for a pattern
+ */
+
+function emitMatches(str, pattern, options) {
+  glob.emit('match', getFiles(str, pattern, options), options.cwd);
+}
 
 /**
  * Expose `glob`

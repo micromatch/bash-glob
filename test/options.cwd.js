@@ -6,7 +6,7 @@ var assert = require('assert');
 var fixtures = path.join(__dirname, 'fixtures');
 var glob = require('..');
 
-describe('changing cwd and searching for **/d', function() {
+describe('options.cwd', function() {
   before(function(cb) {
     process.chdir(fixtures);
     cb();

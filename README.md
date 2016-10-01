@@ -19,7 +19,7 @@ glob(pattern[, options]);
 
 ## API
 
-### [glob](index.js#L33)
+### [glob](index.js#L74)
 
 Asynchronously returns an array of files that match the given pattern or patterns.
 
@@ -27,7 +27,7 @@ Asynchronously returns an array of files that match the given pattern or pattern
 
 ```js
 var glob = require('bash-glob');
-glob(['*.js', '*.md'], {dot: true}, function(err, files) {
+glob('*.js', function(err, files) {
   if (err) return console.log(err);
   console.log(files);
 });
@@ -39,7 +39,27 @@ glob(['*.js', '*.md'], {dot: true}, function(err, files) {
 * `options` **{Object}**: Options to pass to bash. See available [options](#options).
 * `cb` **{Function}**: Callback function, with `err` and `files` array.
 
-### [.sync](index.js#L97)
+### [.each](index.js#L138)
+
+Asynchronously glob an array of files that match any of the given `patterns`.
+
+**Example**
+
+```js
+var glob = require('bash-glob');
+glob.each(['*.js', '*.md'], {dot: true}, function(err, files) {
+  if (err) return console.log(err);
+  console.log(files);
+});
+```
+
+**Params**
+
+* `patterns` **{String}**: One or more glob patterns to use for matching.
+* `options` **{Object}**: Options to pass to bash. See available [options](#options).
+* `cb` **{Function}**: Callback function, with `err` and `files` array.
+
+### [.sync](index.js#L197)
 
 Returns an array of files that match the given patterns or patterns.
 

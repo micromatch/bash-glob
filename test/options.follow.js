@@ -6,7 +6,7 @@ var assert = require('assert');
 var path = require('path');
 var glob = require('..');
 
-describe('follow symlinks:', function() {
+describe('options.follow', function() {
   before(function() {
     process.chdir(path.join(__dirname, 'fixtures'));
   });
@@ -15,13 +15,14 @@ describe('follow symlinks:', function() {
     process.chdir(cwd);
   });
 
-
   it('should follow symlinks', function(cb) {
     if (isWindows) return this.skip();
 
     var pattern = 'a/symlink/**';
     var followSync = glob.sync(pattern, { follow: true }).sort();
     var noFollowSync = glob.sync(pattern).sort();
+
+    assert.notDeepEqual(followSync, noFollowSync, 'followSync should not equal noFollowSync');
 
     glob(pattern, { follow: true }, function(err, files) {
       if (err) throw err;
@@ -32,6 +33,8 @@ describe('follow symlinks:', function() {
         var noFollow = files.sort();
 
         assert.deepEqual(noFollow, noFollowSync, 'sync and async noFollow should match');
+        assert.notDeepEqual(follow, noFollow, 'follow should not equal noFollow');
+
         var long = path.resolve('a/symlink/a/b');
         assert.deepEqual(follow, followSync, 'sync and async follow should match');
         assert.notEqual(follow.indexOf(long), -1, 'follow should have long entry');
