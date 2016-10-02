@@ -2,10 +2,8 @@
 
 var fs = require('fs');
 var path = require('path');
-var diff = require('arr-diff');
 var isGlob = require('is-glob');
 var each = require('async-each');
-var realpath = require('fs.realpath');
 var exists = require('fs-exists-sync');
 var spawn = require('cross-spawn');
 var isExtglob = require('is-extglob');
@@ -14,45 +12,6 @@ var Emitter = require('component-emitter');
 var bashPath = process.platform === 'darwin'
   ? '/usr/local/bin/bash'
   : 'bash';
-
-/**
- * Base bash function
- */
-
-function bash(pattern, options, cb) {
-  if (!isGlob(pattern)) {
-    return nonGlob(pattern, options, cb);
-  }
-
-  fs.stat(options.cwd, function(err, stats) {
-    if (err) {
-      cb(handleError(err, pattern, options));
-      return;
-    }
-
-    if (!stats.isDirectory()) {
-      cb(new Error('cwd is not a directory: ' + options.cwd));
-      return;
-    }
-
-    var cp = spawn(bashPath, cmd(pattern, options), options);
-    var buf = new Buffer(0);
-
-    cp.stdout.on('data', function(data) {
-      emitMatches(data.toString(), pattern, options);
-      buf = Buffer.concat([buf, data]);
-    });
-
-    cp.stderr.on('data', function(data) {
-      cb(handleError(data.toString(), pattern, options));
-    });
-
-    cp.on('close', function(code) {
-      cb(code, getFiles(buf.toString(), pattern, options));
-    });
-  });
-  return glob;
-}
 
 /**
  * Asynchronously returns an array of files that match the given pattern
@@ -91,7 +50,6 @@ function glob(pattern, options, cb) {
   }
 
   var opts = createOptions(pattern, options);
-
   bash(pattern, opts, function(err, files) {
     if (err instanceof Error) {
       cb(err);
@@ -155,12 +113,9 @@ glob.each = function(patterns, options, cb) {
     return;
   }
 
-  var opts = createOptions(patterns, options);
   var acc = [];
-
   each(patterns, function(pattern, next) {
-    opts.each = true;
-
+    var opts = extend({}, options, {each: true});
     glob(pattern, opts, function(err, files) {
       if (err) {
         next(err);
@@ -221,10 +176,15 @@ glob.sync = function(pattern, options) {
     return err;
   }
 
+  if (!isGlob(pattern)) {
+    var fp = path.resolve(opts.cwd, pattern);
+    return (opts.nullglob || exists(fp)) ? [pattern] : [];
+  }
+
   var cp = spawn.sync(bashPath, cmd(pattern, opts), opts);
-  var error = !!cp.stderr ? String(cp.stderr).trim() : null;
+  var error = cp.stderr ? String(cp.stderr).trim() : null;
   if (error) {
-    var err = handleError(error, pattern, opts);
+    err = handleError(error, pattern, opts);
     if (err instanceof Error) {
       throw err;
     }
@@ -257,6 +217,45 @@ glob.end = function(files) {
 };
 
 /**
+ * Base bash function
+ */
+
+function bash(pattern, options, cb) {
+  if (!isGlob(pattern)) {
+    return nonGlob(pattern, options, cb);
+  }
+
+  fs.stat(options.cwd, function(err, stats) {
+    if (err) {
+      cb(handleError(err, pattern, options));
+      return;
+    }
+
+    if (!stats.isDirectory()) {
+      cb(new Error('cwd is not a directory: ' + options.cwd));
+      return;
+    }
+
+    var cp = spawn(bashPath, cmd(pattern, options), options);
+    var buf = new Buffer(0);
+
+    cp.stdout.on('data', function(data) {
+      emitMatches(data.toString(), pattern, options);
+      buf = Buffer.concat([buf, data]);
+    });
+
+    cp.stderr.on('data', function(data) {
+      cb(handleError(data.toString(), pattern, options));
+    });
+
+    cp.on('close', function(code) {
+      cb(code, getFiles(buf.toString(), pattern, options));
+    });
+  });
+  return glob;
+}
+
+/**
  * Escape spaces in glob patterns
  */
 
@@ -270,19 +269,6 @@ function normalize(val) {
     return val.join(' ');
   }
   return val.split(' ').join('\\ ');
-}
-
-function resolve(err, stats, pattern, options) {
-  if (err) {
-    if (err.code === 'ENOENT') {
-      return options.nullglob ? [pattern] : [];
-    }
-    return err;
-  }
-  if (!stats.isDirectory()) {
-    return new Error('cwd is not a directory: ' + options.cwd);
-  }
-  return [pattern];
 }
 
 /**
@@ -401,13 +387,6 @@ function follow(file) {
   return file;
 }
 
-function isDirectory(file) {
-  var stat = tryStat(file.path);
-  if (stat) {
-    return stat.isDirectory();
-  }
-}
-
 function isSymlink(file) {
   var stat = tryStat(file.path);
   if (stat) {
@@ -422,13 +401,6 @@ function tryStat(filepath) {
   return null;
 }
 
-function slashify(filepath) {
-  if (filepath.slice(-1) !== '') {
-    filepath += '/';
-  }
-  return filepath;
-}
-
 /**
  * Handle callback
  */
@@ -440,7 +412,7 @@ function callback(files, pattern, options, cb) {
       return;
     }
     cb(null, files || [pattern]);
-  }
+  };
 }
 
 /**
@@ -448,6 +420,10 @@ function callback(files, pattern, options, cb) {
  */
 
 function nonGlob(pattern, options, cb) {
+  if (options.nullglob) {
+    cb(null, [pattern]);
+    return;
+  }
   fs.stat(pattern, callback(null, pattern, options, cb));
   return;
 }

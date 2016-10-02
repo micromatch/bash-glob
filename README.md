@@ -19,7 +19,7 @@ glob(pattern[, options]);
 
 ## API
 
-### [glob](index.js#L74)
+### [glob](index.js#L35)
 
 Asynchronously returns an array of files that match the given pattern or patterns.
 
@@ -35,11 +35,11 @@ glob('*.js', function(err, files) {
 
 **Params**
 
-* `patterns` **{String}**: One or more glob patterns to use for matching.
+* `patterns` **{String|Array}**: One or more glob patterns to use for matching.
 * `options` **{Object}**: Options to pass to bash. See available [options](#options).
 * `cb` **{Function}**: Callback function, with `err` and `files` array.
 
-### [.each](index.js#L138)
+### [.each](index.js#L100)
 
 Asynchronously glob an array of files that match any of the given `patterns`.
 
@@ -59,7 +59,7 @@ glob.each(['*.js', '*.md'], {dot: true}, function(err, files) {
 * `options` **{Object}**: Options to pass to bash. See available [options](#options).
 * `cb` **{Function}**: Callback function, with `err` and `files` array.
 
-### [.sync](index.js#L197)
+### [.sync](index.js#L159)
 
 Returns an array of files that match the given patterns or patterns.
 
@@ -78,6 +78,8 @@ console.log(glob.sync(['*.js'], {cwd: 'bar'}));
 * `returns` **{Array}**: Returns an array of files.
 
 ## Options
+
+The following options may be used with the main `glob` function or any other method:
 
 * `dotglob`: (or `dot`, for [node-glob](https://github.com/Crafity/node-glob) compatibility) Includes filenames beginning with a `.` (dot) in the results of pathname expansion.
 * `extglob`: Enable extended [pattern matching](http://wiki.bash-hackers.org/syntax/pattern) features.

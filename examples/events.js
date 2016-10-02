@@ -1,13 +1,12 @@
 'use strict';
 
-// var glob = require('glob');
 var glob = require('./');
-// glob.on('files', function(files, cwd) {
-//   // console.log(cwd, files);
-// });
+glob.on('match', function(match, cwd) {
+  console.log(cwd, match);
+});
 
 // console.log(glob.sync('**/*.md', {dotglob: true}));
-// console.log(glob.sync('readme.md', {dotglob: true}));
+console.log(glob.sync('readme.md', {dotglob: true, nocase: true}));
 
 // glob.sync('**/*.md', {dotglob: true});
 // glob.sync('readme.md', {dotglob: true});
@@ -19,8 +18,8 @@ var glob = require('./');
 //   console.log(files);
 // });
 
-glob('*.asfkasjks', {dot: true}, function(err, files) {
-  if (err) return console.log(err);
-  console.log(files);
-});
+// glob('*.asfkasjks', {dot: true}, function(err, files) {
+//   if (err) return console.log(err);
+//   console.log(files);
+// });
 
