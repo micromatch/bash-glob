@@ -10,6 +10,18 @@ Install with [npm](https://www.npmjs.com/):
 $ npm install --save bash-glob
 ```
 
+## Why?
+
+The initial motivation was to use this for generating the `expected` values for comparisons in tests. But as it turns out, this is faster than node-glob in most cases I've tested.
+
+Moreover, this supports the majority of the feature-functionaly in node-glob, and it's more Base-compliant since, well, it **is** Bash.
+
+**Edge cases**
+
+Inevitably there will be edge cases. Thus far, however, I've found that many of the edge cases that seem to be problematic are already addressed or not problematic for Bash.
+
+Please feel free to create an issue if you find a bug or have a feature request.
+
 ## Usage
 
 ```js
@@ -19,7 +31,7 @@ glob(pattern[, options]);
 
 ## API
 
-### [glob](index.js#L35)
+### [glob](index.js#L33)
 
 Asynchronously returns an array of files that match the given pattern or patterns.
 
@@ -39,7 +51,7 @@ glob('*.js', function(err, files) {
 * `options` **{Object}**: Options to pass to bash. See available [options](#options).
 * `cb` **{Function}**: Callback function, with `err` and `files` array.
 
-### [.each](index.js#L100)
+### [.each](index.js#L97)
 
 Asynchronously glob an array of files that match any of the given `patterns`.
 
@@ -59,7 +71,7 @@ glob.each(['*.js', '*.md'], {dot: true}, function(err, files) {
 * `options` **{Object}**: Options to pass to bash. See available [options](#options).
 * `cb` **{Function}**: Callback function, with `err` and `files` array.
 
-### [.sync](index.js#L159)
+### [.sync](index.js#L153)
 
 Returns an array of files that match the given patterns or patterns.
 
