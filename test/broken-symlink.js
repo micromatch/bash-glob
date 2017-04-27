@@ -6,6 +6,7 @@ var path = require('path');
 var each = require('async-each');
 var assert = require('assert');
 var mkdirp = require('mkdirp');
+var del = require('delete');
 var glob = require('..');
 
 var cwd = process.cwd();
@@ -31,7 +32,7 @@ var options = [
 ];
 
 describe('set up broken symlink', function() {
-  before('set up broken symlink', function(cb) {
+  before(function(cb) {
     process.chdir(__dirname);
     cleanup();
     mkdirp.sync('fixtures/a/broken-link');
@@ -39,7 +40,7 @@ describe('set up broken symlink', function() {
     cb();
   });
 
-  after('cleanup', function(cb) {
+  after(function(cb) {
     cleanup();
     process.chdir(cwd);
     cb();
@@ -55,7 +56,11 @@ describe('set up broken symlink', function() {
 
         each(options, function(opts, next) {
           glob(pattern, opts, function(err, files) {
-            if (err) return next(err);
+            if (err) {
+              next(err);
+              return
+            }
+
             var msg = pattern + ' options=' + JSON.stringify(opts);
             if (opts && opts.follow === true) {
               assert.equal(files.indexOf(link), -1, msg);
@@ -64,7 +69,8 @@ describe('set up broken symlink', function() {
             } else {
               assert(!files.length);
             }
-            next();
+
+            setImmediate(next);
           });
         }, cb);
       });
@@ -80,13 +86,17 @@ describe('set up broken symlink', function() {
         }
 
         options.forEach(function(opts) {
-          var files = glob.sync(pattern, opts);
+          try {
+            var files = glob.sync(pattern, opts);
+          } catch (err) {
+            console.log(err)
+          }
           var msg = pattern + ' options=' + JSON.stringify(opts);
 
           if (opts && opts.follow === true) {
             assert.equal(files.indexOf(link), -1, msg);
           } else if (pattern !== link || (opts && opts.nonull)) {
-            assert.notEqual(files.indexOf(link), -1, msg);
+            assert(files.indexOf(link) !== -1, msg);
           } else {
             assert(!files.length);
           }
@@ -97,10 +107,5 @@ describe('set up broken symlink', function() {
 });
 
 function cleanup() {
-  try {
-    fs.unlinkSync(path.resolve(__dirname, 'fixtures/a/broken-link/link'));
-  } catch (e) {}
-  try {
-    fs.rmdirSync(path.resolve(__dirname, 'fixtures/a/broken-link'));
-  } catch (e) {}
+  del.sync('fixtures/a/broken-link');
 }

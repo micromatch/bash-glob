@@ -22,21 +22,21 @@
   "dependencies": {
     "async-each": "^1.0.1",
     "component-emitter": "^1.2.1",
-    "cross-spawn": "^4.0.2",
+    "cross-spawn": "^5.1.0",
     "extend-shallow": "^2.0.1",
-    "fs-exists-sync": "^0.1.0",
-    "is-extglob": "^2.0.0",
-    "is-glob": "^3.0.0"
+    "is-extglob": "^2.1.1",
+    "is-glob": "^3.1.0"
   },
   "devDependencies": {
     "arr-union": "^3.1.0",
     "array-unique": "^0.3.2",
+    "async-array-reduce": "^0.2.1",
     "delete": "^0.3.2",
-    "glob": "^7.1.0",
-    "gulp-format-md": "^0.1.11",
+    "glob": "^7.1.1",
+    "gulp-format-md": "^0.1.12",
+    "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
-    "mocha": "^3.1.0",
-    "yargs-parser": "^4.0.2"
+    "mocha": "^3.3.0"
   },
   "keywords": [
     "bash",
@@ -77,16 +77,16 @@
     "plugins": [
       "gulp-format-md"
     ],
+    "related": {
+      "list": [
+        "bash-match",
+        "micromatch",
+        "nanomatch",
+        "braces"
+      ]
+    },
     "lint": {
       "reflinks": true
-    },
-    "related": {
-      "list": []
-    },
-    "reflinks": [
-      "node-glob",
-      "verb",
-      "verb-generate-readme"
-    ]
+    }
   }
 }

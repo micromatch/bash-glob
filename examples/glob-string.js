@@ -1,6 +1,6 @@
 'use strict';
 
-var argv = require('yargs-parser')(process.argv.slice(2));
+var argv = require('minimist')(process.argv.slice(2));
 var glob = argv.glob ? require('glob') : require('..');
 console.time(argv.glob ? 'glob' : 'bash-glob');
 

@@ -2,7 +2,7 @@
 
 var cwd = process.cwd();
 var isWindows = process.platform === 'win32';
-var argv = require('yargs-parser')(process.argv.slice(2));
+var argv = require('minimist')(process.argv.slice(2));
 var extend = require('extend-shallow');
 var assert = require('assert');
 var path = require('path');
