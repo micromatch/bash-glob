@@ -1,12 +1,12 @@
 {
   "name": "bash-glob",
   "description": "Bash-powered globbing for node.js",
-  "version": "1.0.0",
-  "homepage": "https://github.com/jonschlinkert/bash-glob",
+  "version": "1.0.1",
+  "homepage": "https://github.com/micromatch/bash-glob",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
-  "repository": "jonschlinkert/bash-glob",
+  "repository": "micromatch/bash-glob",
   "bugs": {
-    "url": "https://github.com/jonschlinkert/bash-glob/issues"
+    "url": "https://github.com/micromatch/bash-glob/issues"
   },
   "license": "MIT",
   "files": [

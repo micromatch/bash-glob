@@ -1,4 +1,4 @@
-# bash-glob [![NPM version](https://img.shields.io/npm/v/bash-glob.svg?style=flat)](https://www.npmjs.com/package/bash-glob) [![NPM monthly downloads](https://img.shields.io/npm/dm/bash-glob.svg?style=flat)](https://npmjs.org/package/bash-glob)  [![NPM total downloads](https://img.shields.io/npm/dt/bash-glob.svg?style=flat)](https://npmjs.org/package/bash-glob) [![Linux Build Status](https://img.shields.io/travis/jonschlinkert/bash-glob.svg?style=flat&label=Travis)](https://travis-ci.org/jonschlinkert/bash-glob)
+# bash-glob [![NPM version](https://img.shields.io/npm/v/bash-glob.svg?style=flat)](https://www.npmjs.com/package/bash-glob) [![NPM monthly downloads](https://img.shields.io/npm/dm/bash-glob.svg?style=flat)](https://npmjs.org/package/bash-glob)  [![NPM total downloads](https://img.shields.io/npm/dt/bash-glob.svg?style=flat)](https://npmjs.org/package/bash-glob) [![Linux Build Status](https://img.shields.io/travis/micromatch/bash-glob.svg?style=flat&label=Travis)](https://travis-ci.org/micromatch/bash-glob)
 
 > Bash-powered globbing for node.js
 
