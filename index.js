@@ -4,7 +4,6 @@ var fs = require('fs');
 var path = require('path');
 var isGlob = require('is-glob');
 var each = require('async-each');
-var exists = require('fs-exists-sync');
 var spawn = require('cross-spawn');
 var isExtglob = require('is-extglob');
 var extend = require('extend-shallow');
@@ -65,7 +64,11 @@ function glob(pattern, options, cb) {
     }
 
     glob.emit('files', files, opts.cwd);
-    if (!opts.each) glob.end(files);
+
+    if (!opts.each) {
+      glob.end(files);
+    }
+
     cb(null, files);
   });
 
@@ -163,6 +166,7 @@ glob.sync = function(pattern, options) {
   }
 
   var opts = createOptions(pattern, options);
+
   try {
     var stat = fs.statSync(opts.cwd);
     if (!stat.isDirectory()) {
@@ -178,7 +182,7 @@ glob.sync = function(pattern, options) {
 
   if (!isGlob(pattern)) {
     var fp = path.resolve(opts.cwd, pattern);
-    return (opts.nullglob || exists(fp)) ? [pattern] : [];
+    return (opts.nullglob || fs.existsSync(fp)) ? [pattern] : [];
   }
 
   var cp = spawn.sync(bashPath, cmd(pattern, opts), opts);
@@ -225,14 +229,21 @@ function bash(pattern, options, cb) {
     return nonGlob(pattern, options, cb);
   }
 
-  fs.stat(options.cwd, function(err, stats) {
+  if (typeof options === 'function') {
+    cb = options;
+    options = undefined;
+  }
+
+  var opts = extend({cwd: process.cwd()}, options);
+
+  fs.stat(opts.cwd, function(err, stat) {
     if (err) {
-      cb(handleError(err, pattern, options));
+      cb(handleError(err, pattern, opts));
       return;
     }
 
-    if (!stats.isDirectory()) {
-      cb(new Error('cwd is not a directory: ' + options.cwd));
+    if (!stat.isDirectory()) {
+      cb(new Error('cwd is not a directory: ' + opts.cwd));
       return;
     }
 
@@ -252,6 +263,7 @@ function bash(pattern, options, cb) {
       cb(code, getFiles(buf.toString(), pattern, options));
     });
   });
+
   return glob;
 }
 
@@ -313,11 +325,21 @@ function createOptions(pattern, options) {
  */
 
 function handleError(err, pattern, options) {
-  if (typeof err === 'string' && /no match:/.test(err)) {
-    err = new Error('no matches:' + pattern);
-    err.code = 'NOMATCH';
+  var message = err;
+  if (typeof err === 'string') {
+    err = new Error(message.trim());
+    err.pattern = pattern;
+    err.options = options;
+    if (/invalid shell option/.test(err)) {
+      err.code = 'INVALID_SHELL_OPTION';
+    }
+    if (/no match:/.test(err)) {
+      err.code = 'NOMATCH';
+    }
+    return err;
   }
-  if (err.code === 'ENOENT' || err.code === 'NOMATCH') {
+
+  if (err && (err.code === 'ENOENT' || err.code === 'NOMATCH')) {
     if (options.nullglob === true) {
       return [pattern];
     }
@@ -337,8 +359,7 @@ function getFiles(res, pattern, options) {
   var files = res.split(/\r?\n/).filter(Boolean);
   if (files.length === 1 && files[0] === pattern) {
     files = [];
-  }
-  if (options.realpath === true || options.follow === true) {
+  } else if (options.realpath === true || options.follow === true) {
     files = toAbsolute(files, options);
   }
   if (files.length === 0) {
@@ -363,6 +384,7 @@ function toAbsolute(files, options) {
 
   while (++idx < len) {
     var file = files[idx];
+    if (!file.trim()) continue;
     if (file && options.cwd) {
       file = path.resolve(options.cwd, file);
     }
@@ -377,31 +399,6 @@ function toAbsolute(files, options) {
 }
 
 /**
- * Follow symlinks
- */
-
-function follow(file) {
-  if (!isSymlink(file) && !exists(file)) {
-    return null;
-  }
-  return file;
-}
-
-function isSymlink(file) {
-  var stat = tryStat(file.path);
-  if (stat) {
-    return stat.isSymbolicLink();
-  }
-}
-
-function tryStat(filepath) {
-  try {
-    return fs.lstatSync(filepath);
-  } catch (err) {}
-  return null;
-}
-
-/**
  * Handle callback
  */
 
@@ -413,6 +410,24 @@ function callback(files, pattern, options, cb) {
     }
     cb(null, files || [pattern]);
   };
+}
+
+/**
+ * Follow symlinks
+ */
+
+function follow(filepath) {
+  if (!isSymlink(filepath) && !fs.existsSync(filepath)) {
+    return false;
+  }
+  return filepath;
+}
+
+function isSymlink(file) {
+  try {
+    return fs.lstatSync(filepath).isSymbolicLink();
+  } catch (err) {}
+  return null;
 }
 
 /**
