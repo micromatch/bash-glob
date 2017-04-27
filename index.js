@@ -423,7 +423,7 @@ function follow(filepath) {
   return filepath;
 }
 
-function isSymlink(file) {
+function isSymlink(filepath) {
   try {
     return fs.lstatSync(filepath).isSymbolicLink();
   } catch (err) {}
