@@ -1,7 +1,7 @@
 {
   "name": "bash-glob",
   "description": "Bash-powered globbing for node.js",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "homepage": "https://github.com/jonschlinkert/bash-glob",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "jonschlinkert/bash-glob",
