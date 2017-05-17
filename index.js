@@ -8,9 +8,20 @@ var spawn = require('cross-spawn');
 var isExtglob = require('is-extglob');
 var extend = require('extend-shallow');
 var Emitter = require('component-emitter');
-var bashPath = process.platform === 'darwin'
-  ? '/usr/local/bin/bash'
-  : 'bash';
+
+var bashPath;
+if (process.platform === 'darwin') {
+  // Different versions of OS X seem to place the bash binary in different
+  // locations. This may not be the best way of doing it, but it's better
+  // than nothing...
+  if (fs.existsSync('/usr/local/bin/bash')) {
+    bashPath = '/usr/local/bin/bash';
+  } else {
+    bashPath = '/bin/bash';
+  }
+} else {
+  bashPath = 'bash';
+}
 
 /**
  * Asynchronously returns an array of files that match the given pattern
