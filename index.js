@@ -8,9 +8,7 @@ var spawn = require('cross-spawn');
 var isExtglob = require('is-extglob');
 var extend = require('extend-shallow');
 var Emitter = require('component-emitter');
-var bashPath = process.platform === 'darwin'
-  ? '/usr/local/bin/bash'
-  : 'bash';
+var bashPath = require('bash-path');
 
 /**
  * Asynchronously returns an array of files that match the given pattern
