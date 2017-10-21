@@ -2,7 +2,7 @@
 
 var path = require('path');
 var mkdirp = require('mkdirp');
-var each = require('async-each');
+var each = require('each-parallel-async');
 
 module.exports = function(names, cwd, cb) {
   if (typeof cwd === 'function') {

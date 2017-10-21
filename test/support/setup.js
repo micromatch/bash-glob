@@ -3,7 +3,7 @@
 var fs = require('fs');
 var path = require('path');
 var mkdirp = require('mkdirp');
-var each = require('async-each');
+var each = require('each-parallel-async');
 var del = require('delete');
 
 module.exports = function(files, cwd, cb) {

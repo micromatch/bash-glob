@@ -2,8 +2,7 @@
 
 var isWindows = process.platform === 'win32';
 var fs = require('fs');
-var path = require('path');
-var each = require('async-each');
+var each = require('each-parallel-async');
 var assert = require('assert');
 var mkdirp = require('mkdirp');
 var del = require('delete');
@@ -58,7 +57,7 @@ describe('set up broken symlink', function() {
           glob(pattern, opts, function(err, files) {
             if (err) {
               next(err);
-              return
+              return;
             }
 
             var msg = pattern + ' options=' + JSON.stringify(opts);
@@ -89,7 +88,7 @@ describe('set up broken symlink', function() {
           try {
             var files = glob.sync(pattern, opts);
           } catch (err) {
-            console.log(err)
+            console.log(err);
           }
           var msg = pattern + ' options=' + JSON.stringify(opts);
 
