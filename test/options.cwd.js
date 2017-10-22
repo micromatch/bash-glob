@@ -71,14 +71,10 @@ describe('options.cwd', function() {
     var notdir = 'a/b/c/d';
     var expected = 'cwd is not a directory: ' + notdir;
 
-    it('sync', function(cb) {
-      try {
+    it('sync', function() {
+      assert.throws(function() {
         glob.sync('*', {cwd: notdir});
-        cb(new Error('expected an error'));
-      } catch (err) {
-        assert.equal(err.message, expected);
-        cb();
-      }
+      });
     });
 
     it('async', function(cb) {
@@ -86,6 +82,16 @@ describe('options.cwd', function() {
         assert.equal(err.message, expected);
         cb();
       });
+    });
+
+    it('promise', function() {
+      return glob('*', {cwd: notdir})
+        .then(function() {
+          return Promise.reject(new Error('expected glob error to be thrown'));
+        })
+        .catch(function(err) {
+          assert.equal(err.message, expected);
+        });
     });
   });
 });

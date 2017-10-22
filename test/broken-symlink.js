@@ -35,8 +35,7 @@ describe('set up broken symlink', function() {
     process.chdir(__dirname);
     cleanup();
     mkdirp.sync('fixtures/a/broken-link');
-    fs.symlinkSync('this-does-not-exist', 'fixtures/a/broken-link/link');
-    cb();
+    fs.symlink('this-does-not-exist', 'fixtures/a/broken-link/link', cb);
   });
 
   after(function(cb) {
@@ -45,7 +44,7 @@ describe('set up broken symlink', function() {
     cb();
   });
 
-  describe('async test', function() {
+  describe('async', function() {
     patterns.forEach(function(pattern) {
       it(pattern, function(cb) {
         if (isWindows) {
@@ -76,7 +75,61 @@ describe('set up broken symlink', function() {
     });
   });
 
-  describe('sync test', function() {
+  describe('promise - implied (no callback)', function() {
+    patterns.forEach(function(pattern) {
+      it(pattern, function(cb) {
+        if (isWindows) {
+          this.skip();
+          return;
+        }
+
+        each(options, function(opts, next) {
+          glob(pattern, opts)
+            .then(function(files) {
+              var msg = pattern + ' options=' + JSON.stringify(opts);
+              if (opts && opts.follow === true) {
+                assert.equal(files.indexOf(link), -1, msg);
+              } else if (pattern !== link || (opts && opts.nonull)) {
+                assert.notEqual(files.indexOf(link), -1, msg);
+              } else {
+                assert(!files.length);
+              }
+              setImmediate(next);
+            })
+            .catch(next);
+        }, cb);
+      });
+    });
+  });
+
+  describe('promise - explicit', function() {
+    patterns.forEach(function(pattern) {
+      it(pattern, function(cb) {
+        if (isWindows) {
+          this.skip();
+          return;
+        }
+
+        each(options, function(opts, next) {
+          glob.promise(pattern, opts)
+            .then(function(files) {
+              var msg = pattern + ' options=' + JSON.stringify(opts);
+              if (opts && opts.follow === true) {
+                assert.equal(files.indexOf(link), -1, msg);
+              } else if (pattern !== link || (opts && opts.nonull)) {
+                assert.notEqual(files.indexOf(link), -1, msg);
+              } else {
+                assert(!files.length);
+              }
+              setImmediate(next);
+            })
+            .catch(next);
+        }, cb);
+      });
+    });
+  });
+
+  describe('sync', function() {
     patterns.forEach(function(pattern) {
       it(pattern, function() {
         if (isWindows) {
