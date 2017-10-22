@@ -1,6 +1,8 @@
-# bash-glob [![NPM version](https://img.shields.io/npm/v/bash-glob.svg?style=flat)](https://www.npmjs.com/package/bash-glob) [![NPM monthly downloads](https://img.shields.io/npm/dm/bash-glob.svg?style=flat)](https://npmjs.org/package/bash-glob)  [![NPM total downloads](https://img.shields.io/npm/dt/bash-glob.svg?style=flat)](https://npmjs.org/package/bash-glob) [![Linux Build Status](https://img.shields.io/travis/micromatch/bash-glob.svg?style=flat&label=Travis)](https://travis-ci.org/micromatch/bash-glob)
+# bash-glob [![NPM version](https://img.shields.io/npm/v/bash-glob.svg?style=flat)](https://www.npmjs.com/package/bash-glob) [![NPM monthly downloads](https://img.shields.io/npm/dm/bash-glob.svg?style=flat)](https://npmjs.org/package/bash-glob) [![NPM total downloads](https://img.shields.io/npm/dt/bash-glob.svg?style=flat)](https://npmjs.org/package/bash-glob) [![Linux Build Status](https://img.shields.io/travis/micromatch/bash-glob.svg?style=flat&label=Travis)](https://travis-ci.org/micromatch/bash-glob)
 
 > Bash-powered globbing for node.js
+
+Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.
 
 ## Install
 
@@ -8,12 +10,6 @@ Install with [npm](https://www.npmjs.com/):
 
 ```sh
 $ npm install --save bash-glob
-```
-
-Install with [yarn](https://yarnpkg.com):
-
-```sh
-$ yarn add bash-glob
 ```
 
 **Install bash 4.3 or later**
@@ -45,10 +41,7 @@ glob(pattern[, options]);
 
 ## API
 
-<details>
-<summary><strong>glob</strong></summary>
-
-### [glob](index.js#L32)
+### [glob](index.js#L30)
 
 Asynchronously returns an array of files that match the given pattern or patterns.
 
@@ -68,12 +61,7 @@ glob('*.js', function(err, files) {
 });
 ```
 
-</details>
-
-<details>
-<summary><strong>.each</strong></summary>
-
-### [.each](index.js#L100)
+### [.each](index.js#L98)
 
 Asynchronously glob an array of files that match any of the given `patterns`.
 
@@ -93,12 +81,7 @@ glob.each(['*.js', '*.md'], {dot: true}, function(err, files) {
 });
 ```
 
-</details>
-
-<details>
-<summary><strong>.sync</strong></summary>
-
-### [.sync](index.js#L156)
+### [.sync](index.js#L154)
 
 Returns an array of files that match the given patterns or patterns.
 
@@ -116,8 +99,6 @@ console.log(glob.sync('*.js', {cwd: 'foo'}));
 console.log(glob.sync(['*.js'], {cwd: 'bar'}));
 ```
 
-</details>
-
 ## Options
 
 The following options may be used with the main `glob` function or any other method:
@@ -131,20 +112,28 @@ The following options may be used with the main `glob` function or any other met
 
 ## About
 
-### Related projects
-
-* [bash-match](https://www.npmjs.com/package/bash-match): Match strings using bash. Does not work on windows, and does not read from the… [more](https://github.com/jonschlinkert/bash-match) | [homepage](https://github.com/jonschlinkert/bash-match "Match strings using bash. Does not work on windows, and does not read from the file system. This library requires that Bash 4.3 or higher is installed and is mostly used for checking parity in unit tests.")
-* [braces](https://www.npmjs.com/package/braces): Fast, comprehensive, bash-like brace expansion implemented in JavaScript. Complete support for the Bash 4.3 braces… [more](https://github.com/micromatch/braces) | [homepage](https://github.com/micromatch/braces "Fast, comprehensive, bash-like brace expansion implemented in JavaScript. Complete support for the Bash 4.3 braces specification, without sacrificing speed.")
-* [micromatch](https://www.npmjs.com/package/micromatch): Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch. | [homepage](https://github.com/jonschlinkert/micromatch "Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.")
-* [nanomatch](https://www.npmjs.com/package/nanomatch): Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash… [more](https://github.com/jonschlinkert/nanomatch) | [homepage](https://github.com/jonschlinkert/nanomatch "Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash 4.3 wildcard support only (no support for exglobs, posix brackets or braces)")
-
-### Contributing
+<details>
+<summary><strong>Contributing</strong></summary>
 
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).
 
 Please read the [contributing guide](.github/contributing.md) for advice on opening issues, pull requests, and coding standards.
 
-### Building docs
+</details>
+
+<details>
+<summary><strong>Running Tests</strong></summary>
+
+Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:
+
+```sh
+$ npm install && npm test
+```
+
+</details>
+
+<details>
+<summary><strong>Building docs</strong></summary>
 
 _(This project's readme.md is generated by [verb](https://github.com/verbose/verb-generate-readme), please don't edit the readme directly. Any changes to the readme must be made in the [.verb.md](.verb.md) readme template.)_
 
@@ -154,13 +143,16 @@ To generate the readme, run the following command:
 $ npm install -g verbose/verb#dev verb-generate-readme && verb
 ```
 
-### Running tests
+</details>
 
-Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:
+### Related projects
 
-```sh
-$ npm install && npm test
-```
+You might also be interested in these projects:
+
+* [bash-match](https://www.npmjs.com/package/bash-match): Match strings using bash. Does not work on windows, and does not read from the… [more](https://github.com/micromatch/bash-match) | [homepage](https://github.com/micromatch/bash-match "Match strings using bash. Does not work on windows, and does not read from the file system. This library requires that Bash 4.3 or higher is installed and is mostly used for checking parity in unit tests.")
+* [braces](https://www.npmjs.com/package/braces): Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support… [more](https://github.com/micromatch/braces) | [homepage](https://github.com/micromatch/braces "Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support for the Bash 4.3 braces specification, without sacrificing speed.")
+* [micromatch](https://www.npmjs.com/package/micromatch): Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch. | [homepage](https://github.com/micromatch/micromatch "Glob matching for javascript/node.js. A drop-in replacement and faster alternative to minimatch and multimatch.")
+* [nanomatch](https://www.npmjs.com/package/nanomatch): Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash… [more](https://github.com/micromatch/nanomatch) | [homepage](https://github.com/micromatch/nanomatch "Fast, minimal glob matcher for node.js. Similar to micromatch, minimatch and multimatch, but complete Bash 4.3 wildcard support only (no support for exglobs, posix brackets or braces)")
 
 ### Author
 
@@ -176,4 +168,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on April 27, 2017._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on October 22, 2017._
