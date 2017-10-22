@@ -11,7 +11,7 @@ describe('bash-glob', function() {
       assert.equal(typeof glob, 'function');
     });
 
-    it('should export a `.sync` method', function() {
+    it('should expose a `.sync` method', function() {
       assert.equal(typeof glob.sync, 'function');
     });
   });
@@ -19,7 +19,7 @@ describe('bash-glob', function() {
   describe('async: errors', function() {
     it('should throw an error when a callback is not passed', function(cb) {
       try {
-        glob();
+        glob('*', {}, null);
         cb(new Error('expected an error'));
       } catch (err) {
         assert(err);

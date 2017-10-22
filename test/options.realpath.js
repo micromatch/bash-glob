@@ -79,6 +79,24 @@ describe('options.realpath', function() {
           cb();
         });
       });
+
+      it('promise: ' + JSON.stringify(options), function() {
+        if (isWindows) return this.skip();
+
+        return glob(pattern, options)
+          .then(function(files) {
+            assert.deepEqual(files, expected, 'async: ' + expected);
+          });
+      });
+
+      it('promise explicit: ' + JSON.stringify(options), function() {
+        if (isWindows) return this.skip();
+
+        return glob.promise(pattern, options)
+          .then(function(files) {
+            assert.deepEqual(files, expected, 'async: ' + expected);
+          });
+      });
     });
   });
 });

@@ -3,7 +3,7 @@
 var fs = require('fs');
 var path = require('path');
 var isGlob = require('is-glob');
-var each = require('async-each');
+var each = require('each-parallel-async');
 var spawn = require('cross-spawn');
 var isExtglob = require('is-extglob');
 var extend = require('extend-shallow');
@@ -38,7 +38,10 @@ function glob(pattern, options, cb) {
   }
 
   if (typeof cb !== 'function') {
-    throw new TypeError('expected callback to be a function');
+    if (typeof cb !== 'undefined') {
+      throw new TypeError('expected callback to be a function');
+    }
+    return glob.promise.apply(glob, arguments);
   }
 
   if (typeof pattern !== 'string') {
@@ -57,7 +60,7 @@ function glob(pattern, options, cb) {
       files = err;
     }
 
-    if (Array.isArray(files) && !files.length && opts.nullglob) {
+    if (opts.nullglob === true && Array.isArray(files) && !files.length) {
       files = [pattern];
     }
 
@@ -211,6 +214,22 @@ glob.sync = function(pattern, options) {
  * Emit `end` and remove listeners
  */
 
+glob.promise = function(pattern, options, cb) {
+  return new Promise(function(resolve, reject) {
+    glob(pattern, options, function(err, files) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(files);
+      }
+    });
+  });
+};
+
+/**
+ * Emit `end` and remove listeners
+ */
+
 glob.end = function(files) {
   glob.emit('end', files);
   glob.off('match');
@@ -261,8 +280,6 @@ function bash(pattern, options, cb) {
       cb(code, getFiles(buf.toString(), pattern, options));
     });
   });
-
-  return glob;
 }
 
 /**
@@ -271,12 +288,7 @@ function bash(pattern, options, cb) {
 
 function normalize(val) {
   if (Array.isArray(val)) {
-    var len = val.length;
-    var idx = -1;
-    while (++idx < len) {
-      val[idx] = normalize(val[idx]);
-    }
-    return val.join(' ');
+    val = val.join(' ');
   }
   return val.split(' ').join('\\ ');
 }
@@ -287,14 +299,25 @@ function normalize(val) {
 
 function cmd(patterns, options) {
   var str = normalize(patterns);
-  var valid = ['dotglob', 'extglob', 'failglob', 'globstar', 'nocaseglob', 'nullglob'];
+  var keys = Object.keys(options);
   var args = [];
-  for (var key in options) {
-    if (options.hasOwnProperty(key) && valid.indexOf(key) !== -1) {
+  var valid = [
+    'dotglob',
+    'extglob',
+    'failglob',
+    'globstar',
+    'nocaseglob',
+    'nullglob'
+  ];
+
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    if (valid.indexOf(key) !== -1) {
       args.push('-O', key);
     }
   }
-  args.push('-c', `for i in ${str}; do echo $i; done`);
+
+  args.push('-c', 'for i in ' + str + '; do echo $i; done');
   return args;
 }
 
@@ -368,7 +391,10 @@ function getFiles(res, pattern, options) {
       return new Error('no matches:' + pattern);
     }
   }
-  return files;
+
+  return files.filter(function(filepath) {
+    return filepath !== '.' && filepath !== '..';
+  });
 }
 
 /**

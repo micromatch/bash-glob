@@ -25,12 +25,40 @@ describe('options.nocase', function() {
     del(dir, cb);
   });
 
-  it('should match a file with no extension', function(cb) {
-    var options = {cwd: dir, nocase: true};
-    glob('README?(.*)', options, function(err, files) {
-      if (err) return cb(err);
+  describe('async', function() {
+    it('should match a file with no extension', function(cb) {
+      var options = {cwd: dir, nocase: true};
+      glob('README?(.*)', options, function(err, files) {
+        if (err) return cb(err);
+        assert.deepEqual(files, ['README', 'README.md']);
+        cb();
+      });
+    });
+  });
+
+  describe('promise', function() {
+    it('should match a file with no extension', function() {
+      var options = {cwd: dir, nocase: true};
+      return glob('README?(.*)', options)
+        .then(function(files) {
+          assert.deepEqual(files, ['README', 'README.md']);
+        });
+    });
+
+    it('should match a file with no extension (explicit)', function() {
+      var options = {cwd: dir, nocase: true};
+      return glob.promise('README?(.*)', options)
+        .then(function(files) {
+          assert.deepEqual(files, ['README', 'README.md']);
+        });
+    });
+  });
+
+  describe('sync', function() {
+    it('should match a file with no extension', function() {
+      var options = {cwd: dir, nocase: true};
+      var files = glob.sync('README?(.*)', options);
       assert.deepEqual(files, ['README', 'README.md']);
-      cb();
     });
   });
 });

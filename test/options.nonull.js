@@ -31,7 +31,7 @@ describe('options.nonull', function() {
     var pattern = ele[0];
     var expected = ele[2].sort();
 
-    it(pattern + ' ' + util.inspect(options), function(cb) {
+    it('async:' + pattern + ' ' + util.inspect(options), function(cb) {
       var files = glob.sync(pattern, options).sort();
       assert.deepEqual(files, expected, 'sync results');
 
@@ -41,6 +41,28 @@ describe('options.nonull', function() {
         assert.deepEqual(files, expected, 'async results');
         cb();
       });
+    });
+
+    it('promise:' + pattern + ' ' + util.inspect(options), function() {
+      var files = glob.sync(pattern, options).sort();
+      assert.deepEqual(files, expected, 'sync results');
+
+      return glob(pattern, options)
+        .then(function(files) {
+          files = files.sort();
+          assert.deepEqual(files, expected, 'async results');
+        });
+    });
+
+    it('promise explicit:' + pattern + ' ' + util.inspect(options), function() {
+      var files = glob.sync(pattern, options).sort();
+      assert.deepEqual(files, expected, 'sync results');
+
+      return glob.promise(pattern, options)
+        .then(function(files) {
+          files = files.sort();
+          assert.deepEqual(files, expected, 'async results');
+        });
     });
   });
 });
