@@ -2,6 +2,8 @@
 
 require('mocha');
 var assert = require('assert');
+var sinon = require('sinon');
+var mock = require('mock-require');
 var glob = require('..');
 
 describe('bash-glob', function() {
@@ -47,5 +49,22 @@ describe('bash-glob', function() {
         cb();
       }
     });
+  });
+
+  it('throws exception if `bash` not found', function() {
+    var bashPathSpy = sinon.spy(function () { return null; });
+    mock('bash-path', bashPathSpy);
+
+    var glob = mock.reRequire('..')
+
+    try {
+      glob.sync(['*']);
+
+    } catch (err) {
+      assert(err);
+      assert.equal(err.message, '`bash` not found');
+    }
+
+    mock.stop('bash-path');
   });
 });
