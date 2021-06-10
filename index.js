@@ -186,7 +186,7 @@ glob.sync = function(pattern, options) {
     return (opts.nullglob || fs.existsSync(fp)) ? [pattern] : [];
   }
 
-  var cp = spawn.sync(bashPath, cmd(pattern, opts), opts);
+  var cp = spawn.sync(getBash(), cmd(pattern, opts), opts);
   var error = cp.stderr ? String(cp.stderr).trim() : null;
   if (error) {
     err = handleError(error, pattern, opts);
@@ -264,7 +264,7 @@ function bash(pattern, options, cb) {
       return;
     }
 
-    var cp = spawn(bashPath, cmd(pattern, options), options);
+    var cp = spawn(getBash(), cmd(pattern, options), options);
     var buf = new Buffer(0);
 
     cp.stdout.on('data', function(data) {
@@ -473,6 +473,22 @@ function nonGlob(pattern, options, cb) {
 
 function emitMatches(str, pattern, options) {
   glob.emit('match', getFiles(str, pattern, options), options.cwd);
+}
+
+/**
+ * Returns bash path if exists.
+ * @ignore
+ * @return {String} Bash bin path.
+ *
+ */
+function getBash() {
+  const bashBinPath = bashPath()
+
+  if (!bashBinPath) {
+    throw new TypeError('`bash` not found')
+  }
+
+  return bashBinPath
 }
 
 /**

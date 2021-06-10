@@ -1,12 +1,12 @@
-sudo: false
 os:
   - linux
-  - osx
+  - windows
 language: node_js
+
+# https://github.com/nodejs/Release#end-of-life-releases
 node_js:
-  - node
+  - '16'
+  - '14'
+  - '12'
+  - '10'
   - '8'
-  - '7'
-  - '6'
-  - '5'
-  - '4'
